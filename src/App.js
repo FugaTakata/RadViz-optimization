@@ -40,7 +40,7 @@ const App = () => {
 
   return (
     <div>
-      <RadViz data={data} dimensions={dimensions} colorKey={"species"} />
+      <RadViz data={data} dims={dimensions} colorKey={"species"} />
     </div>
   );
 };

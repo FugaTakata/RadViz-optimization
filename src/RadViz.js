@@ -45,7 +45,7 @@ const radviz = (data, dimensions, r) => {
   });
 };
 
-const RadViz = ({ data, dimensions, colorKey }) => {
+const RadViz = ({ data, dims, colorKey }) => {
   const r = 300;
   const contentWidth = 2 * r;
   const contentHeight = 2 * r;
@@ -53,15 +53,21 @@ const RadViz = ({ data, dimensions, colorKey }) => {
   const width = contentWidth + margin * 2;
   const height = contentHeight + margin * 2;
   const lineColor = "#444";
+  const [dimensions, setDimensions] = useState([]);
+  const [points, setpoints] = useState([]);
 
   const color = d3.scaleOrdinal(d3.schemeCategory10);
   for (const item of data) {
     color(item[colorKey]);
   }
 
-  dimensions = optimizer(data, dimensions, 0);
+  useEffect(() => {
+    setpoints(radviz(data, dimensions, r));
+  }, [dimensions]);
 
-  const points = radviz(data, dimensions, r);
+  useEffect(() => {
+    setDimensions(dims);
+  }, [dims]);
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`}>
@@ -85,14 +91,22 @@ const RadViz = ({ data, dimensions, colorKey }) => {
           );
         })}
         {data.map((item, i) => {
-          const { x, y } = points[i];
-          return (
-            <g key={i} transform={`translate(${x},${y})`}>
-              <circle r="3" fill={color(item[colorKey])} opacity="0.8">
-                <title>{dimensions.map((p) => item[p]).join(",")}</title>
-              </circle>
-            </g>
-          );
+          if (points.length > 0) {
+            const { x, y } = points[i];
+            return (
+              <g
+                key={i}
+                transform={`translate(${x},${y})`}
+                onClick={() => {
+                  setDimensions(optimizer(data, dimensions, i));
+                }}
+              >
+                <circle r="3" fill={color(item[colorKey])} opacity="0.8">
+                  <title>{dimensions.map((p) => item[p]).join(",")}</title>
+                </circle>
+              </g>
+            );
+          }
         })}
       </g>
     </svg>
