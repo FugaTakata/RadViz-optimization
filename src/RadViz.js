@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import * as d3 from "d3";
 
-const optimizer = (data, dimensions, i) => {
+const singleOptimizer = (data, dimensions, i) => {
   const d = [];
   if (data.length > 0) {
     dimensions
@@ -45,7 +45,14 @@ const radviz = (data, dimensions, r) => {
   });
 };
 
-const RadViz = ({ data, dims, colorKey }) => {
+const RadViz = ({
+  data,
+  dims,
+  colorKey,
+  toggleSelected,
+  current,
+  selected,
+}) => {
   const r = 300;
   const contentWidth = 2 * r;
   const contentHeight = 2 * r;
@@ -70,46 +77,70 @@ const RadViz = ({ data, dims, colorKey }) => {
   }, [dims]);
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`}>
-      <g transform={`translate(${margin + r},${margin + r})`}>
-        <circle r={r} fill="none" stroke={lineColor} />
-        {dimensions.map((property, i) => {
-          return (
-            <g
-              key={i}
-              transform={`rotate(${(360 / dimensions.length) * i + 90})`}
-            >
-              <line x1="0" y1="0" x2="0" y2={-r} stroke={lineColor} />
-              <text
-                y={-r}
-                textAnchor="middle"
-                dominantBaseline="text-after-edge"
-              >
-                {property}
-              </text>
-            </g>
-          );
-        })}
-        {data.map((item, i) => {
-          if (points.length > 0) {
-            const { x, y } = points[i];
-            return (
-              <g
-                key={i}
-                transform={`translate(${x},${y})`}
-                onClick={() => {
-                  setDimensions(optimizer(data, dimensions, i));
-                }}
-              >
-                <circle r="3" fill={color(item[colorKey])} opacity="0.8">
-                  <title>{dimensions.map((p) => item[p]).join(",")}</title>
-                </circle>
-              </g>
-            );
-          }
-        })}
-      </g>
-    </svg>
+    <div className="card">
+      <div className="card-content">
+        <svg viewBox={`0 0 ${width} ${height}`}>
+          <g transform={`translate(${margin + r},${margin + r})`}>
+            <circle r={r} fill="none" stroke={lineColor} />
+            {dimensions.map((property, i) => {
+              return (
+                <g
+                  key={i}
+                  transform={`rotate(${(360 / dimensions.length) * i + 90})`}
+                >
+                  <line x1="0" y1="0" x2="0" y2={-r} stroke={lineColor} />
+                  <text
+                    y={-r}
+                    textAnchor="middle"
+                    dominantBaseline="text-after-edge"
+                  >
+                    {property}
+                  </text>
+                </g>
+              );
+            })}
+            {data.map((item, i) => {
+              if (points.length > 0) {
+                const { x, y } = points[i];
+                return (
+                  <g
+                    key={i}
+                    transform={`translate(${x},${y})`}
+                    onClick={() => {
+                      toggleSelected(i);
+                    }}
+                  >
+                    <circle r="3" fill={color(item[colorKey])} opacity="0.8">
+                      <title>{dimensions.map((p) => item[p]).join(",")}</title>
+                    </circle>
+                  </g>
+                );
+              }
+            })}
+          </g>
+        </svg>
+        <div className="buttons">
+          <button
+            className="button"
+            disabled={current === null}
+            onClick={() => {
+              setDimensions(singleOptimizer(data, dimensions, current));
+            }}
+          >
+            この点について最適化
+          </button>
+          <button
+            className="button"
+            disabled={selected.length === 0}
+            onClick={() => {
+              // setDimensions(optimizer(data, dimensions, selected));
+            }}
+          >
+            選択された点について最適化
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
