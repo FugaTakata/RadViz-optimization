@@ -5,7 +5,12 @@ import "bulma/css/bulma.min.css";
 import "bulma-slider/dist/css/bulma-slider.min.css";
 import RadViz from "./components/RadViZ";
 import { calcCordinates } from "./utils/calcCordinates";
-import { multiOptimize, singleOptimize } from "./utils/optimize";
+import {
+  globalOptimize,
+  localOptimize,
+  singleOptimize,
+} from "./utils/optimize";
+import { local } from "d3";
 
 const App = () => {
   // const [data, setData] = useState([]);
@@ -60,7 +65,7 @@ const App = () => {
   const [selected, setSelected] = useState([]);
   const [currentSelected, setCurrentSelected] = useState(null);
   // const [points, setPoints] = useState([]);
-  const [percentile, setPercentile] = useState(0);
+  const [percentile, setPercentile] = useState(1);
   let dimensionsKey = [];
   const r = 300;
 
@@ -137,7 +142,7 @@ const App = () => {
                     className="slider is-fullwidth is-info has-output"
                     type="range"
                     step="1"
-                    min="0"
+                    min="1"
                     max="100"
                     value={percentile}
                     placeholder="percentile input"
@@ -150,14 +155,21 @@ const App = () => {
 
               <button
                 className="button is-info"
-                disabled={selected.length === 0}
+                disabled={selected.length < 2}
+                onClick={() => {
+                  setDimensions(
+                    localOptimize(data, dimensions, percentile, r, selected)
+                  );
+                }}
               >
                 Local optimize
               </button>
               <button
                 className="button is-info"
                 onClick={() => {
-                  setDimensions(multiOptimize(data, dimensions, percentile, r));
+                  setDimensions(
+                    globalOptimize(data, dimensions, percentile, r)
+                  );
                 }}
               >
                 Global optimize

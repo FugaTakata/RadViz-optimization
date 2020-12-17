@@ -17,33 +17,33 @@ export const singleOptimize = (data, dimensions, i) => {
   return d;
 };
 
-// only glocal
-export const multiOptimize = (data, dimensionsKey, percentile, r) => {
+export const globalOptimize = (data, dimensionKey, percentile, r) => {
   const candidates = [];
-  for (let n = 0; n <= percentile; ++n) {
-    const target = Math.ceil((n / 100) * data.length);
+  for (let n = 1; n <= percentile; ++n) {
+    const target = Math.ceil((n / 100) * data.length) - 1;
     const p = {};
     const d = [];
 
-    dimensionsKey.forEach((dimensionKey) => {
+    dimensionKey.forEach((dimensionKey) => {
       p[dimensionKey] = data.sort((a, b) => a.dimensionKey - b.dimensionKey)[
         target
-      ];
+      ][dimensionKey];
     });
 
-    console.log(dimensionsKey);
-    dimensionsKey
-      .map((property) => [property, p[property]])
+    dimensionKey
+      .map((dimensionKey) => {
+        return [dimensionKey, p[dimensionKey]];
+      })
       .sort((a, b) => b[1] - a[1])
       .forEach((item, i) => {
-        if (i % 2 == 0) {
+        if (i % 2 === 0) {
           d.push(item[0]);
         } else {
           d.unshift(item[0]);
         }
       });
 
-    const points = calcCordinates(data, dimensionsKey, r);
+    const points = calcCordinates(data, d, r);
 
     let distance = 0;
     points.forEach(({ x, y }) => {
@@ -56,42 +56,55 @@ export const multiOptimize = (data, dimensionsKey, percentile, r) => {
     });
   }
   candidates.sort((a, b) => b.distance - a.distance);
-  console.log(candidates);
   return candidates[0].dimensions;
+};
 
-  // const a = Array.from({ length: data.length }, (v, k) => k);
-  // const partition = (a, left, right, pivotIndex) => {
-  //   const pivotValue = data[pivotIndex];
-  //   const tmp = a[pivotIndex];
-  //   a[pivotIndex] = a[right];
-  //   a[right] = tmp;
-  //   let storeIndex = left;
-  //   for (let i = left; i < right; ++i) {
-  //     if (data[i] < pivotValue) {
-  //       const tmp = a[storeIndex];
-  //       a[storeIndex] = a[i];
-  //       a[i] = tmp;
-  //       ++storeIndex;
-  //     }
-  //     const tmp = a[right];
-  //     a[storeIndex] = a[right];
-  //     a[right] = tmp;
-  //     return storeIndex;
-  //   }
-  // };
+export const localOptimize = (data, dimensionsKey, percentile, r, selected) => {
+  const candidates = [];
+  const selectedData = data.filter((_, index) => selected.includes(index));
+  for (let n = 1; n <= percentile; ++n) {
+    const target = Math.ceil((n / 100) * selectedData.length) - 1;
+    const p = {};
+    const d = [];
 
-  // const quickSelect = (a, left, right, k) => {
-  //   if (left === right) {
-  //     return a[left];
-  //   }
-  //   let pivotIndex = left;
-  //   pivotIndex = partition(a, left, right, pivotIndex);
-  //   if (k === pivotIndex) {
-  //     return quickSelect(a, left, pivotIndex - 1, k);
-  //   } else {
-  //     return quickSelect(a, pivotIndex + 1, right, k);
-  //   }
-  // };
+    dimensionsKey.forEach((dimensionKey) => {
+      p[dimensionKey] = selectedData.sort(
+        (a, b) => a.dimensionKey - b.dimensionKey
+      )[target][dimensionKey];
+    });
 
-  // dimensions.map();
+    dimensionsKey
+      .map((dimensionKey) => {
+        return [dimensionKey, p[dimensionKey]];
+      })
+      .sort((a, b) => b[1] - a[1])
+      .forEach((item, i) => {
+        if (i % 2 === 0) {
+          d.push(item[0]);
+        } else {
+          d.unshift(item[0]);
+        }
+      });
+
+    const points = calcCordinates(selectedData, d, r);
+    let distance = 0;
+    const centerOfGravity = { x: 0, y: 0 };
+    points.forEach(({ x, y }) => {
+      centerOfGravity.x += x;
+      centerOfGravity.y += y;
+    });
+    centerOfGravity.x /= points.length;
+    centerOfGravity.y /= points.length;
+
+    points.forEach(({ x, y }) => {
+      distance += (x - centerOfGravity.x) ** 2 + (y - centerOfGravity.y) ** 2;
+    });
+
+    candidates.push({
+      dimensions: d,
+      distance,
+    });
+  }
+  candidates.sort((a, b) => b.distance - a.distance);
+  return candidates[0].dimensions;
 };
