@@ -10,7 +10,6 @@ import {
   localOptimize,
   singleOptimize,
 } from "./utils/optimize";
-import { local } from "d3";
 
 const App = () => {
   // const [data, setData] = useState([]);
@@ -66,18 +65,18 @@ const App = () => {
   const [currentSelected, setCurrentSelected] = useState(null);
   // const [points, setPoints] = useState([]);
   const [percentile, setPercentile] = useState(1);
-  let dimensionsKey = [];
   const r = 300;
 
   useEffect(() => {
     const dataURL = "data/iris.json";
+    const clusterKey = "species";
     fetch(dataURL)
       .then((res) => res.json())
       .then((data) => {
         const max = {};
         const min = {};
         const dimensionsKey = Object.keys(data[0]).filter(
-          (key) => key !== "species"
+          (key) => key !== clusterKey
         );
         dimensionsKey.map((key) => {
           max[key] = data[0][key];
@@ -193,7 +192,7 @@ const App = () => {
             dimensions={dimensions}
             currentSelected={currentSelected}
             selected={selected}
-            colorKey={"species"}
+            colorKey={clusterKey}
             selectPoint={selectPoint}
             // points={points}
             r={r}
