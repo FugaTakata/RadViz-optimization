@@ -67,12 +67,13 @@ const App = () => {
   const [percentile, setPercentile] = useState(1);
   const r = 300;
 
+  const dataURL = "data/postcrisis_pq2011.json";
+  const clusterKey = "";
   useEffect(() => {
-    const dataURL = "data/iris.json";
-    const clusterKey = "species";
     fetch(dataURL)
       .then((res) => res.json())
       .then((data) => {
+        console.log(data);
         const max = {};
         const min = {};
         const dimensionsKey = Object.keys(data[0]).filter(
