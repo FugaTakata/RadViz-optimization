@@ -21,6 +21,7 @@ const RadViz = ({
   const lineColor = "#444";
 
   const color = d3.scaleOrdinal(d3.schemeCategory10);
+  // console.log(data);
   for (const item of data) {
     color(item[colorKey]);
   }
@@ -44,8 +45,11 @@ const RadViz = ({
                   <line x1="0" y1="0" x2="0" y2={-r} stroke={lineColor} />
                   <text
                     y={-r}
-                    textAnchor="middle"
-                    dominantBaseline="text-after-edge"
+                    textAnchor="start"
+                    // stroke={property === "WHO" ? "red" : "black"}
+                    // dominantBaseline="text-after-edge"
+                    dominantBaseline="middle"
+                    transform={`rotate(-90 ${0} ${-r})`}
                   >
                     {property}
                   </text>

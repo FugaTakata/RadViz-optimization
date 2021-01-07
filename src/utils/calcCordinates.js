@@ -5,7 +5,12 @@ const calcCordinates = (data, dimensions, r) => {
   const scales = dimensions.map((property) => {
     return d3
       .scaleLinear()
-      .domain(d3.extent(data, (item) => item[property]))
+      .domain(
+        d3.extent(
+          data.map((d) => d.values),
+          (item) => item[property]
+        )
+      )
       .range([0, 1]);
   });
 
@@ -15,7 +20,7 @@ const calcCordinates = (data, dimensions, r) => {
     let c = 0;
     const dt = (2 * Math.PI) / n;
     for (let j = 0; j < n; ++j) {
-      const v = scales[j](item[dimensions[j]]);
+      const v = scales[j](item.values[dimensions[j]]);
       a += v * Math.cos(dt * j);
       b += v * Math.sin(dt * j);
       c += v;

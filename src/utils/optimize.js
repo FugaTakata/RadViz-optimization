@@ -24,11 +24,14 @@ export const globalOptimize = (data, dimensionKey, percentile, r) => {
     const p = {};
     const d = [];
 
-    dimensionKey.forEach((dimensionKey) => {
-      p[dimensionKey] = data.sort((a, b) => a.dimensionKey - b.dimensionKey)[
+    dimensionKey.forEach((key) => {
+      p[key] = data.sort((a, b) => a.values[key] - b.values[key])[
         target
-      ][dimensionKey];
+      ].values[key];
     });
+    console.log(data);
+    console.log(target);
+    console.log(p);
 
     dimensionKey
       .map((dimensionKey) => {

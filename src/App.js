@@ -67,39 +67,17 @@ const App = () => {
   const [percentile, setPercentile] = useState(1);
   const r = 300;
 
-  const dataURL = "data/postcrisis_pq2011.json";
+  // const dataURL = "data/normalizedTweetData.json";
+  const dataURL = "data/normalized_tweet_data_1000.json";
+  // const dataURL = "data/iris.json";
   const clusterKey = "";
+  // const clusterKey = "species";
   useEffect(() => {
     fetch(dataURL)
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
-        const max = {};
-        const min = {};
-        const dimensionsKey = Object.keys(data[0]).filter(
-          (key) => key !== clusterKey
-        );
-        dimensionsKey.map((key) => {
-          max[key] = data[0][key];
-          min[key] = data[0][key];
-        });
-        data.map((item) => {
-          dimensionsKey.map((key) => {
-            if (max[key] < item[key]) {
-              max[key] = item[key];
-            }
-            if (item[key] < min[key]) {
-              min[key] = item[key];
-            }
-          });
-        });
-        data.map((item) => {
-          dimensionsKey.map((key) => {
-            item[key] = (item[key] - min[key]) / (max[key] - min[key]);
-          });
-        });
-        setData(data);
-        setDimensions(dimensionsKey);
+        setData(data.data);
+        setDimensions(data.anchors);
       })
       .catch((err) => console.error(err));
   }, []);

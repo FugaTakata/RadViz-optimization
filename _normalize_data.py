@@ -137,16 +137,17 @@ t = Tokenizer()
 for obj in json_load:
     tweets.append(obj['text'])
 
-re = {"data": [], "maxs": {}, "mins": {}, "anchors": anchors}
+re = {"data": [], "max": {}, "min": {}, "anchors": anchors}
 
 for anchor in anchors:
-    re['mins'][anchor] = float('inf')
-    re['maxs'][anchor] = 0
+    re['min'][anchor] = float('inf')
+    re['max'][anchor] = 0
 
 for tweet in tweets:
     tweetData = {
-        # "text": tweet,
-        "tokens": [], "values": {}}
+        "text": tweet,
+        # "tokens": [],
+        "values": {}}
     tokens = []
     for token in t.tokenize(tweet):
         tokens.append(token.surface)
@@ -157,15 +158,15 @@ for tweet in tweets:
 for anchor in anchors:
     for data in re['data']:
         count = data['values'][anchor]
-        if count < re['mins'][anchor]:
-            re['mins'][anchor] = count
-        if re['maxs'][anchor] < count:
-            re['maxs'][anchor] = count
+        if count < re['min'][anchor]:
+            re['min'][anchor] = count
+        if re['max'][anchor] < count:
+            re['max'][anchor] = count
 
 for data in re['data']:
     for anchor in anchors:
-        data['values'][anchor] = (
-            data['values'][anchor] - re['mins'][anchor]) / (re['maxs'][anchor] - re['mins'][anchor])
+        data['values'][anchor] = 0 if re['max'][anchor] == 0 else (
+            data['values'][anchor] - re['min'][anchor]) / (re['max'][anchor] - re['min'][anchor])
 
 with open(file_name, mode='w') as f:
-    f.write(re)
+    f.write(json.dumps(re, ensure_ascii=False))
